@@ -48,10 +48,17 @@ const InputBox = ({
   return (
     <>
       <div className="relative md:w-2/3 flex flex-col md:flex-row items-center justify-between gap-3">
-        <label className="text-xl">{label}:</label>
+        <label
+          htmlFor="inputBox"
+          aria-labelledby="inputBox"
+          className="text-xl"
+        >
+          {label}:
+        </label>
         <div className="relative w-full md:w-3/4">
           <input
             type="text"
+            name="inputBox"
             value={inputValue}
             onChange={handleInputChange}
             onDrop={handleDrop}

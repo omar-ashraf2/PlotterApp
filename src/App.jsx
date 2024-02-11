@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchColumns } from "./api/api";
 import ColumnsSidebar from "./components/ColumnsSidebar";
-import Chart from "./components/Chart";
+import Chart from "./components/ChartComponent/Chart";
 
 const App = () => {
   const [columns, setColumns] = useState([]);

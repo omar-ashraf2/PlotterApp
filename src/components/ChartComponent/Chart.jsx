@@ -1,8 +1,8 @@
 import { useEffect, useReducer, useState } from "react";
-import { fetchChartData } from "../api/api";
-import DimensionInputBox from "./DimensionInputBox";
-import MeasureInputBox from "./MeasureInputBox";
-import ChartSection from "./ChartSection";
+import { fetchChartData } from "../../api/api";
+import DimensionInputBox from "../DimensionInputBox";
+import MeasureInputBox from "../MeasureInputBox";
+import ChartSection from "../ChartSection";
 
 // Initial state for the reducer
 const initialState = {
@@ -138,7 +138,10 @@ const Chart = ({ columns }) => {
 
   // Render Chart component
   return (
-    <div className="w-full md:w-9/12 h-full lg:w-8/12 mx-auto mt-10 flex flex-col justify-center items-center md:gap-20 gap-10">
+    <div
+      data-testid="chart-container"
+      className="w-full md:w-9/12 h-full lg:w-8/12 mx-auto mt-10 flex flex-col justify-center items-center md:gap-20 gap-10"
+    >
       <div className="w-full flex flex-col items-center gap-5">
         {/* Dimension InputBox */}
         <DimensionInputBox

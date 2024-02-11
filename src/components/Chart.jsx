@@ -1,26 +1,62 @@
-import { useState, useEffect } from "react";
+import { useEffect, useReducer } from "react";
 import { fetchChartData } from "../api/api";
 import InputBox from "./InputBox";
 import ChartContent from "./ChartContent";
 import Loader from "./Loader";
 
+const initialState = {
+  selectedDimension: "",
+  selectedMeasure: "",
+  chartData: [],
+  dimensionErrorMessage: "",
+  measureErrorMessage: "",
+  loading: false,
+  error: null,
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "SET_DIMENSION":
+      return { ...state, selectedDimension: action.payload };
+    case "SET_MEASURE":
+      return { ...state, selectedMeasure: action.payload };
+    case "SET_CHART_DATA":
+      return { ...state, chartData: action.payload };
+    case "SET_DIMENSION_ERROR":
+      return { ...state, dimensionErrorMessage: action.payload };
+    case "SET_MEASURE_ERROR":
+      return { ...state, measureErrorMessage: action.payload };
+    case "SET_LOADING":
+      return { ...state, loading: action.payload };
+    case "SET_ERROR":
+      return { ...state, error: action.payload };
+    case "CLEAR_INPUT_FIELDS":
+      return { ...initialState };
+    default:
+      return state;
+  }
+};
+
 const Chart = ({ columns }) => {
-  const [selectedDimension, setSelectedDimension] = useState("");
-  const [selectedMeasure, setSelectedMeasure] = useState("");
-  const [chartData, setChartData] = useState([]);
-  const [dimensionErrorMessage, setDimensionErrorMessage] = useState("");
-  const [measureErrorMessage, setMeasureErrorMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const {
+    selectedDimension,
+    selectedMeasure,
+    chartData,
+    dimensionErrorMessage,
+    measureErrorMessage,
+    loading,
+    error,
+  } = state;
 
   useEffect(() => {
     fetchData();
   }, [selectedDimension, selectedMeasure]);
 
   const fetchData = async () => {
-    setError(null);
-    setDimensionErrorMessage("");
-    setMeasureErrorMessage("");
+    dispatch({ type: "SET_ERROR", payload: null });
+    dispatch({ type: "SET_DIMENSION_ERROR", payload: "" });
+    dispatch({ type: "SET_MEASURE_ERROR", payload: "" });
 
     if (!selectedDimension || !selectedMeasure) return;
 
@@ -32,16 +68,22 @@ const Chart = ({ columns }) => {
     );
 
     if (selectedDimensionColumn?.function !== "dimension") {
-      setDimensionErrorMessage("The input is not a valid dimension");
+      dispatch({
+        type: "SET_DIMENSION_ERROR",
+        payload: "The input is not a valid dimension",
+      });
       return;
     }
 
     if (selectedMeasureColumn?.function !== "measure") {
-      setMeasureErrorMessage("The input is not a valid measure");
+      dispatch({
+        type: "SET_MEASURE_ERROR",
+        payload: "The input is not a valid measure",
+      });
       return;
     }
 
-    setLoading(true);
+    dispatch({ type: "SET_LOADING", payload: true });
     try {
       const data = await fetchChartData([selectedMeasure], selectedDimension);
       if (data) {
@@ -49,19 +91,25 @@ const Chart = ({ columns }) => {
           [selectedDimension]: value,
           [selectedMeasure]: data.data[1].values[index],
         }));
-        setChartData(actualValues);
+        dispatch({ type: "SET_CHART_DATA", payload: actualValues });
       }
     } catch (error) {
-      setError(`Error fetching chart data: ${error}`);
+      dispatch({
+        type: "SET_ERROR",
+        payload: `Error fetching chart data: ${error}`,
+      });
     } finally {
-      setLoading(false);
+      dispatch({ type: "SET_LOADING", payload: false });
     }
   };
 
-  const clearInputFields = () => {
-    setSelectedDimension("");
-    setSelectedMeasure("");
-    setChartData([]);
+  const clearInputFields = (identifier) => {
+    if (identifier === "dimension") {
+      dispatch({ type: "SET_DIMENSION", payload: "" });
+    } else if (identifier === "measure") {
+      dispatch({ type: "SET_MEASURE", payload: "" });
+    }
+    dispatch({ type: "SET_CHART_DATA", payload: [] });
   };
 
   const renderContent = () => {
@@ -101,19 +149,23 @@ const Chart = ({ columns }) => {
         <InputBox
           label="Dimension"
           placeholder="Drag and Drop a Dimension"
-          onDropFunction={setSelectedDimension}
+          onDropFunction={(value) =>
+            dispatch({ type: "SET_DIMENSION", payload: value })
+          }
           value={selectedDimension}
           notValidInputMessage={dimensionErrorMessage}
-          clearInput={clearInputFields}
+          clearInput={() => clearInputFields("dimension")}
         />
         {/* Measure InputBox */}
         <InputBox
           label="Measure"
           placeholder="Drag and Drop a Measure"
-          onDropFunction={setSelectedMeasure}
+          onDropFunction={(value) =>
+            dispatch({ type: "SET_MEASURE", payload: value })
+          }
           value={selectedMeasure}
           notValidInputMessage={measureErrorMessage}
-          clearInput={clearInputFields}
+          clearInput={() => clearInputFields("measure")}
         />
       </div>
       {/* Chart Content */}

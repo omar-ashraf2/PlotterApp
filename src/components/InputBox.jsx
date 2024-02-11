@@ -7,6 +7,7 @@ const InputBox = ({
   value,
   notValidInputMessage,
   clearInput,
+  identifier,
 }) => {
   const [inputValue, setInputValue] = useState(value);
 
@@ -25,7 +26,7 @@ const InputBox = ({
 
   const handleClearInput = () => {
     setInputValue("");
-    clearInput();
+    clearInput(identifier);
   };
 
   const inputClassName = `w-full py-2 px-3 shadow-sm rounded-lg border focus:outline-none focus:border-blue-500 font-bold ${

@@ -25,7 +25,7 @@ const InputBox = ({ placeholder, label, onDropFunction }) => {
 
   return (
     <div className="relative flex items-center justify-between gap-3 w-1/3">
-      <label className="text-xl">{label}</label>
+      <label className="text-xl">{label}:</label>
       <div className="relative w-3/4">
         <input
           type="text"
@@ -35,7 +35,9 @@ const InputBox = ({ placeholder, label, onDropFunction }) => {
           onDragOver={handleDragOver}
           placeholder={placeholder}
           className={`w-full py-2 px-3 rounded-lg border focus:outline-none focus:border-blue-500 ${
-            isDropped ? "border-green-400 shadow-sm text-green-400" : ""
+            isDropped
+              ? "border-green-400 shadow-sm text-green-400 font-bold"
+              : ""
           }`}
         />
       </div>

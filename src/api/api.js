@@ -8,7 +8,6 @@ export const fetchColumns = async () => {
       throw new Error("Failed to fetch columns");
     }
     const data = await response.json();
-    console.log(data);
     return data.columns;
   } catch (error) {
     console.error("Error fetching columns:", error);
@@ -17,29 +16,26 @@ export const fetchColumns = async () => {
 };
 
 // Fetch chart data based on dimensions and measures from the API
-export const fetchChartData = async (dimensions, measures) => {
+export const fetchChartData = async (measures, dimension) => {
   try {
-    const requestData = {
-      dimensions,
-      measures,
-    };
-
     const response = await fetch(`${API_BASE_URL}/data`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(requestData),
+      body: JSON.stringify({
+        measures,
+        dimension,
+      }),
     });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch chart data");
+      throw new Error("API response was not ok");
     }
+
     const responseData = await response.json();
-    console.log(responseData.data);
-    return responseData.data;
+    return responseData;
   } catch (error) {
-    console.error("Error fetching chart data:", error);
-    throw error;
+    console.error("Error fetching data:", error);
   }
 };

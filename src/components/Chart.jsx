@@ -61,6 +61,7 @@ const Chart = ({ columns }) => {
   const clearInputFields = () => {
     setSelectedDimension("");
     setSelectedMeasure("");
+    setChartData([]);
   };
 
   const renderContent = () => {

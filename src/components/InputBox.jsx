@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 const InputBox = ({
   placeholder,
@@ -29,9 +29,7 @@ const InputBox = ({
   };
 
   const inputClassName = `w-full py-2 px-3 shadow-sm rounded-lg border focus:outline-none focus:border-blue-500 font-bold ${
-    notValidInputMessage
-      ? "border-red-400 text-red-400"
-      : "border-green-400 text-green-400"
+    notValidInputMessage ? "border-red-400 text-red-400" : "text-green-400"
   }`;
 
   return (

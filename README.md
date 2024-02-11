@@ -14,8 +14,9 @@ Welcome to the documentation for the React Chart Application. This comprehensive
    - [Chart Section](#chart-section)
    - [App](#app)
 4. [Technologies Used](#technologies-used)
-5. [Usage](#usage)
-6. [Author](#author)
+5. [Live Demo](#live-demo)
+6. [Usage](#usage)
+7. [Author](#author)
 
 ## Introduction
 
@@ -60,6 +61,10 @@ The `App` component orchestrates the rendering of the sidebar, chart, and input 
 - **recharts**: A charting library for React applications, used for creating interactive charts.
 - **Tailwind CSS**: A utility-first CSS framework used for styling components and creating responsive layouts.
 
+## Live Demo
+
+You can explore a live demo of Plotter Chart Application [here](https://main--plotter-app-react.netlify.app/).
+
 ## Usage
 
 To run the React Chart Application:
@@ -67,7 +72,21 @@ To run the React Chart Application:
 1. Clone the repository to your local machine.
 2. Navigate to the project directory.
 3. Install dependencies using `npm install`.
-4. Start the development server using `npm run dev` (Vite Project).
+4. Start the development server using `npm run dev`(Vite Project).
+
+### Debugging
+
+If you encounter issues with rendering content or accessing data due to CORS (Cross-Origin Resource Sharing) restrictions, you can use the "Allow CORS: Access-Control-Allow-Origin" Chrome extension.
+
+[Allow CORS: Access-Control-Allow-Origin](https://chromewebstore.google.com/detail/allow-cors-origin/igomecoafaibkpelmljakiklmgdajojk) is a browser extension that allows you to bypass CORS restrictions and access resources from different origins during development and testing.
+
+To use the extension:
+
+1. Install the extension from the Chrome Web Store using the provided [link](https://chromewebstore.google.com/detail/allow-cors-origin/igomecoafaibkpelmljakiklmgdajojk).
+2. Enable the extension by clicking on its icon in the Chrome toolbar.
+3. Refresh your application to allow CORS requests.
+
+This extension can be particularly useful if your application relies on API calls or resources from external domains that may have CORS restrictions in place.
 
 ## Author
 

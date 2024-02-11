@@ -1,7 +1,8 @@
 {
-  "name": "incortatask",
+  "name": "plotter-app",
   "private": true,
   "version": "1.0.0",
+  "author": "omar-ashraf",
   "type": "module",
   "scripts": {
     "dev": "vite",

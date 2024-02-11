@@ -3,13 +3,17 @@ const ColumnsSidebar = ({ columns }) => {
     event.dataTransfer.setData("text/plain", columnName);
   };
   return (
-    <div className="flex-[0.1] min-h-screen border-r bg-">
-      <h2 className="font-bold text-3xl border-b p-8">Columns</h2>
-      <div className="p-8">
+    <div className="md:w-max min-h-screen border-r">
+      <h2 className="font-bold text-3xl border-b p-4 md:p-8">Columns</h2>
+      <div className="p-4 md:p-8">
         {columns.map((column) => (
           <div
             key={column.name}
-            className="mb-5 text-lg font-medium"
+            className={`mb-3 md:mb-5 text-base md:text-lg font-medium ${
+              column.function === "dimension"
+                ? "text-green-600"
+                : "text-blue-600"
+            }`}
             draggable="true"
             onDragStartCapture={(event) => handleDragStart(event, column.name)}
           >

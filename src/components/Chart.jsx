@@ -1,9 +1,10 @@
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { fetchChartData } from "../api/api";
-import InputBox from "./InputBox";
-import ChartContent from "./ChartContent";
-import Loader from "./Loader";
+import DimensionInputBox from "./DimensionInputBox";
+import MeasureInputBox from "./MeasureInputBox";
+import ChartSection from "./ChartSection";
 
+// Initial state for the reducer
 const initialState = {
   selectedDimension: "",
   selectedMeasure: "",
@@ -14,6 +15,7 @@ const initialState = {
   error: null,
 };
 
+// Reducer function to manage state transitions
 const reducer = (state, action) => {
   switch (action.type) {
     case "SET_DIMENSION":
@@ -37,6 +39,7 @@ const reducer = (state, action) => {
   }
 };
 
+// Main Chart component
 const Chart = ({ columns }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const {
@@ -49,17 +52,24 @@ const Chart = ({ columns }) => {
     error,
   } = state;
 
+  const [isInputChanged, setIsInputChanged] = useState(false);
+
+  // Fetch data when dimension, measure, or input change
   useEffect(() => {
     fetchData();
-  }, [selectedDimension, selectedMeasure]);
+  }, [selectedDimension, selectedMeasure, isInputChanged]);
 
+  // Fetch chart data asynchronously
   const fetchData = async () => {
+    // Reset error messages and loading state
     dispatch({ type: "SET_ERROR", payload: null });
     dispatch({ type: "SET_DIMENSION_ERROR", payload: "" });
     dispatch({ type: "SET_MEASURE_ERROR", payload: "" });
 
+    // If either dimension or measure is not selected, return
     if (!selectedDimension || !selectedMeasure) return;
 
+    // Find selected dimension and measure columns
     const selectedDimensionColumn = columns.find(
       (column) => column.name === selectedDimension
     );
@@ -67,6 +77,7 @@ const Chart = ({ columns }) => {
       (column) => column.name === selectedMeasure
     );
 
+    // Validate dimension and measure columns
     if (selectedDimensionColumn?.function !== "dimension") {
       dispatch({
         type: "SET_DIMENSION_ERROR",
@@ -83,93 +94,82 @@ const Chart = ({ columns }) => {
       return;
     }
 
+    // Set loading state before fetching data
     dispatch({ type: "SET_LOADING", payload: true });
     try {
+      // Fetch chart data from API
       const data = await fetchChartData([selectedMeasure], selectedDimension);
       if (data) {
+        // Format fetched data
         const actualValues = data.data[0].values.map((value, index) => ({
           [selectedDimension]: value,
           [selectedMeasure]: data.data[1].values[index],
         }));
+        // Update chart data in the state
         dispatch({ type: "SET_CHART_DATA", payload: actualValues });
       }
     } catch (error) {
+      // Handle error during data fetching
       dispatch({
         type: "SET_ERROR",
         payload: `Error fetching chart data: ${error}`,
       });
     } finally {
+      // Reset loading state after data fetching completes
       dispatch({ type: "SET_LOADING", payload: false });
     }
   };
 
+  // Clear input fields based on the provided identifier
   const clearInputFields = (identifier) => {
     if (identifier === "dimension") {
       dispatch({ type: "SET_DIMENSION", payload: "" });
     } else if (identifier === "measure") {
       dispatch({ type: "SET_MEASURE", payload: "" });
     }
+    // Clear chart data
     dispatch({ type: "SET_CHART_DATA", payload: [] });
   };
 
-  const renderContent = () => {
-    if (loading) {
-      return <Loader />;
-    }
-
-    if (error || dimensionErrorMessage || measureErrorMessage) {
-      return (
-        <h1 className="text-center text-gray-500 text-3xl">
-          {error || dimensionErrorMessage || measureErrorMessage}
-        </h1>
-      );
-    }
-
-    if (chartData.length) {
-      return (
-        <ChartContent
-          chartData={chartData}
-          selectedDimension={selectedDimension}
-          selectedMeasure={selectedMeasure}
-        />
-      );
-    }
-
-    return (
-      <h1 className="text-center text-gray-500 text-3xl">
-        Please drag and drop a valid dimension and measurement.
-      </h1>
-    );
+  // Handle input change
+  const handleInputChange = () => {
+    setIsInputChanged(true);
   };
 
+  // Render Chart component
   return (
-    <div className="flex-[0.9] h-full flex flex-col justify-between items-center gap-28 mt-10">
+    <div className="w-full md:w-9/12 h-full lg:w-8/12 mx-auto mt-10 flex flex-col justify-center items-center md:gap-20 gap-10">
       <div className="w-full flex flex-col items-center gap-5">
         {/* Dimension InputBox */}
-        <InputBox
-          label="Dimension"
-          placeholder="Drag and Drop a Dimension"
-          onDropFunction={(value) =>
+        <DimensionInputBox
+          selectedDimension={selectedDimension}
+          dimensionErrorMessage={dimensionErrorMessage}
+          onDimensionChange={(value) =>
             dispatch({ type: "SET_DIMENSION", payload: value })
           }
-          value={selectedDimension}
-          notValidInputMessage={dimensionErrorMessage}
-          clearInput={() => clearInputFields("dimension")}
+          clearDimensionInput={() => clearInputFields("dimension")}
+          onInputChange={handleInputChange}
         />
+
         {/* Measure InputBox */}
-        <InputBox
-          label="Measure"
-          placeholder="Drag and Drop a Measure"
-          onDropFunction={(value) =>
+        <MeasureInputBox
+          selectedMeasure={selectedMeasure}
+          measureErrorMessage={measureErrorMessage}
+          onMeasureChange={(value) =>
             dispatch({ type: "SET_MEASURE", payload: value })
           }
-          value={selectedMeasure}
-          notValidInputMessage={measureErrorMessage}
-          clearInput={() => clearInputFields("measure")}
+          clearMeasureInput={() => clearInputFields("measure")}
+          onInputChange={handleInputChange}
         />
       </div>
-      {/* Chart Content */}
-      <div className="w-full">{renderContent()}</div>
+      {/* Chart Section */}
+      <ChartSection
+        loading={loading}
+        chartData={chartData}
+        error={error || dimensionErrorMessage || measureErrorMessage}
+        selectedDimension={selectedDimension}
+        selectedMeasure={selectedMeasure}
+      />
     </div>
   );
 };

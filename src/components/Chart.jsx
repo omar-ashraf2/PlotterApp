@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { fetchChartData } from "../api/api";
 import InputBox from "./InputBox";
 import ChartContent from "./ChartContent";
 import Loader from "./Loader";
 
-const Chart = () => {
+const Chart = ({ columns }) => {
   const [selectedDimension, setSelectedDimension] = useState("");
   const [selectedMeasure, setSelectedMeasure] = useState("");
   const [chartData, setChartData] = useState([]);
+  const [dimensionErrorMessage, setDimensionErrorMessage] = useState("");
+  const [measureErrorMessage, setMeasureErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -17,30 +19,64 @@ const Chart = () => {
 
   const fetchData = async () => {
     setError(null);
+    setDimensionErrorMessage("");
+    setMeasureErrorMessage("");
 
-    if (selectedDimension && selectedMeasure) {
-      setLoading(true);
-      try {
-        const data = await fetchChartData([selectedMeasure], selectedDimension);
-        if (data) {
-          const actualValue = data.data[0].values.map((value, index) => ({
-            [selectedDimension]: value,
-            [selectedMeasure]: data.data[1].values[index],
-          }));
-          setChartData(actualValue);
-        }
-      } catch (error) {
-        setError(`Error fetching chart data: ${error}`);
-      } finally {
-        setLoading(false);
-      }
+    if (!selectedDimension || !selectedMeasure) return;
+
+    const selectedDimensionColumn = columns.find(
+      (column) => column.name === selectedDimension
+    );
+    const selectedMeasureColumn = columns.find(
+      (column) => column.name === selectedMeasure
+    );
+
+    if (selectedDimensionColumn?.function !== "dimension") {
+      setDimensionErrorMessage("The input is not a valid dimension");
+      return;
     }
+
+    if (selectedMeasureColumn?.function !== "measure") {
+      setMeasureErrorMessage("The input is not a valid measure");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = await fetchChartData([selectedMeasure], selectedDimension);
+      if (data) {
+        const actualValues = data.data[0].values.map((value, index) => ({
+          [selectedDimension]: value,
+          [selectedMeasure]: data.data[1].values[index],
+        }));
+        setChartData(actualValues);
+      }
+    } catch (error) {
+      setError(`Error fetching chart data: ${error}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearInputFields = () => {
+    setSelectedDimension("");
+    setSelectedMeasure("");
   };
 
   const renderContent = () => {
     if (loading) {
       return <Loader />;
-    } else if (chartData.length) {
+    }
+
+    if (error || dimensionErrorMessage || measureErrorMessage) {
+      return (
+        <h1 className="text-center text-gray-500 text-3xl">
+          {error || dimensionErrorMessage || measureErrorMessage}
+        </h1>
+      );
+    }
+
+    if (chartData.length) {
       return (
         <ChartContent
           chartData={chartData}
@@ -48,15 +84,13 @@ const Chart = () => {
           selectedMeasure={selectedMeasure}
         />
       );
-    } else {
-      return (
-        <h1 className="text-center text-gray-500 text-3xl">
-          {error == null
-            ? "Please drag and drop the dimension and measurement."
-            : error}
-        </h1>
-      );
     }
+
+    return (
+      <h1 className="text-center text-gray-500 text-3xl">
+        Please drag and drop a valid dimension and measurement.
+      </h1>
+    );
   };
 
   return (
@@ -67,12 +101,18 @@ const Chart = () => {
           label="Dimension"
           placeholder="Drag and Drop a Dimension"
           onDropFunction={setSelectedDimension}
+          value={selectedDimension}
+          notValidInputMessage={dimensionErrorMessage}
+          clearInput={clearInputFields}
         />
         {/* Measure InputBox */}
         <InputBox
           label="Measure"
           placeholder="Drag and Drop a Measure"
           onDropFunction={setSelectedMeasure}
+          value={selectedMeasure}
+          notValidInputMessage={measureErrorMessage}
+          clearInput={clearInputFields}
         />
       </div>
       {/* Chart Content */}

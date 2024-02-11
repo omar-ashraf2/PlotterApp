@@ -21,7 +21,7 @@ const App = () => {
       {/* Sidebar */}
       <ColumnsSidebar columns={columns} />
       {/* Chart and Inputs */}
-      <Chart />
+      <Chart columns={columns} />
     </div>
   );
 };
